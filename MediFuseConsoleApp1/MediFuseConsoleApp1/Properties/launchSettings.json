@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "MediFuseConsoleApp1": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
