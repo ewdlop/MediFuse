@@ -22,15 +22,15 @@ List<int> ino = root.Inorder().ToList();
 // Postorder traversal
 List<int> post = root.Postorder().ToList();
 
-Console.WriteLine("Preorder: " + string.Join(", ", pre));
-Console.WriteLine("Inorder: " + string.Join(", ", ino));
-Console.WriteLine("Postorder: " + string.Join(", ", post));
+Console.WriteLine($"Preorder: {string.Join(", ", pre)}");
+Console.WriteLine($"Inorder: {string.Join(", ", ino)}");
+Console.WriteLine($"Postorder: {string.Join(", ", post)}");
 
 // Using LINQ selector on a preorder traversal to select only even values
 List<int> evenValues = root.Traverse(Tree.Preorder)
                      .Where(x => x % 2 == 0)
                      .ToList();
-Console.WriteLine("We are the Even values in Preorder: " + string.Join(", ", evenValues));
+Console.WriteLine($"We are the Even values in Preorder: {string.Join(", ", evenValues)}");
 
 
 /***
