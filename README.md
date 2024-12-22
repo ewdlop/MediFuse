@@ -96,6 +96,10 @@ Certainly! Here's an explanation of each item in your list:
 
 - **Modifiers:** Two-character codes added to HCPCS codes to provide additional information about the service or procedure performed.
 
+Certainly! Here's an explanation of the remaining items in your list:
+
 **2015 ICD-9-CM Codes:**
 
-- **Legacy ICD-9-CM Codes:** The International Classification of Diseases, 9th Revision, Clinical Modification ( 
+- **Legacy ICD-9-CM Codes:** The International Classification of Diseases, 9th Revision, Clinical Modification (ICD-9-CM) was a standardized coding system used in the United States to classify diseases and a wide variety of signs, symptoms, abnormal findings, complaints, social circumstances, and external causes of injury or disease. It was used for medical billing and statistical purposes. ICD-9-CM was replaced by ICD-10-CM on October 1, 2015, but legacy codes may still be referenced for historical data. 
+
+If you have any specific questions or need further details on any of these topics, feel free to ask! 
