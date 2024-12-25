@@ -57,6 +57,19 @@ List<int> searchValues = root.Traverse(Tree.DepthFirstSearch)
                      .ToList();
 Console.WriteLine($"We are the search values in Depth First Search: {string.Join(", ", searchValues)}");
 
+
+Tree.Preorder(root).ToList().ForEach(x => Console.Write($"{x}, "));
+Console.WriteLine();
+Tree.InOrder(root).ToList().ForEach(x => Console.Write($"{x}, "));
+Console.WriteLine();
+Tree.PostOrder(root).ToList().ForEach(x => Console.Write($"{x}, "));
+Console.WriteLine();
+Tree.DepthFirstSearch(root).ToList().ForEach(x => Console.Write($"{x}, "));
+Console.WriteLine();
+Tree.BreadthFirstSearch(root).ToList().ForEach(x => Console.Write($"{x}, "));
+Console.WriteLine();
+Tree.DepthLimitedSearch(root).ToList().ForEach(x => Console.Write($"{x}, "));
+
 //Console output:
 /***
 Hello Ray!
