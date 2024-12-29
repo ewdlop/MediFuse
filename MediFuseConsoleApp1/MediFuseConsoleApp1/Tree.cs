@@ -1,60 +1,71 @@
 ﻿using System.Collections;
+using static MediFuseConsoleApp1.Tree;
 
 namespace MediFuseConsoleApp1;
 
 public static partial class Tree
 {
+    //public interface IDebugNode<T>
+    //{
+    //    IDebugNode<T> Debug { get; }
+    //}
 
-    public interface IReadOnlyReadOnlyNodeNeighborHood<T>
-    {
-        IReadOnlyList<IReadOnlyNode<T>> AsReadOnlyNodeList { get; }
-    }
-
-    public interface IReadOnlyNodeNeighborHood<T> : IReadOnlyReadOnlyNodeNeighborHood<T>
-    {
-        IReadOnlyList<INode<T>> AsReadOnlyList { get; }
-        IReadOnlyNodeNeighborHood<T> AsReadOnlyNeighbor { get; }
-    }
 
     public interface IValue<T>
     {
-        T Value { get; }
+        abstract T? Value { get; }
     }
 
-    public interface IReadOnlyNode<T> : IValue<T>, IReadOnlyNodeNeighborHood<T>
+    public interface IReadOnlyNode<T> : IValue<T>
     {
-        IReadOnlyNode<T> AsReadOnlyNode { get; }
+        abstract IReadOnlyNode<T?> AsReadOnlyNode { get; }
+    }
+
+    public interface IReadOnlyNodeNeighborHood<T>
+    {
+        abstract IReadOnlyList<INode<T?>?> AsReadOnlyNodeList { get; }
+        abstract IReadOnlyList<IReadOnlyNode<T?>?> AsReadOnlyReadOnlyNodeList { get; }
+        abstract IReadOnlyNode<T?>?[] AsReadOnlyNodes { get; }
     }
 
     public interface INodeNeighborHood<T> : IReadOnlyNodeNeighborHood<T>
     {
-        INode<T>[] Nodes { get; }
+        abstract INode<T?>?[] Nodes { get; }
     }
 
-    public interface INode<T> : INodeNeighborHood<T>, IReadOnlyNode<T>;
+    public interface INodeNeighbor<T> : IReadOnlyNode<T>, IReadOnlyNodeNeighborHood<T> { }
 
-    public interface ITrieNode<T> : INode<T>
+    public interface INode<T> : INodeNeighborHood<T>, INodeNeighbor<T>, IEnumerable<INode<T?>?>, IReadOnlyNode<T> { }
+
+    public interface ITrieNode<T> : INode<T?>
     {
-        bool IsEndOfWord { get; }
+        abstract bool IsEndOfWord { get; }
     }
 
-    public class Node<T>(T? Value, Node<T?>[] Nodes) : INode<T?>, IEnumerable<INode<T?>?>
+    public class Node<T>(T? Value, Node<T?>?[] Nodes) : INode<T?>
     {
-        public virtual INode<T?>[] Nodes { get; set; } = Nodes;
+
+        public static readonly Lazy<INode<T?>> DebugNode = new(() => new Node<T?>(default, []));
+
+        public virtual INode<T?>?[] Nodes { get; set; } = Nodes;
 
         public virtual IReadOnlyNode<T?> AsReadOnlyNode => this;
 
         public virtual T? Value { get; set; } = Value;
 
-        public virtual IReadOnlyList<INode<T?>> AsReadOnlyList => Nodes;
+        public virtual IReadOnlyList<INode<T?>?> AsReadOnlyNodeList => Nodes;
 
-        public virtual IReadOnlyNodeNeighborHood<T?> AsReadOnlyNeighbor => this;
+        public virtual IReadOnlyList<IReadOnlyNode<T?>?> AsReadOnlyReadOnlyNodeList => Nodes;
 
-        public virtual IReadOnlyList<IReadOnlyNode<T?>> AsReadOnlyNodeList => Nodes;
+        public virtual IReadOnlyNode<T?>?[] AsReadOnlyNodes => Nodes;
 
         public virtual IEnumerator<INode<T?>?> GetEnumerator()
         {
-            return this.Preorder().GetEnumerator();
+            yield return this;
+            foreach (INode<T?>? node in Nodes)
+            {
+                yield return node;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -65,19 +76,20 @@ public static partial class Tree
         public virtual bool IsEndOfWord { get; set; } = IsEndOfWord;
     }
 
+
     /// <summary>
     /// Pre-order Traversal: Root -> Left -> Right
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<INode<T?>?> Preorder<T>(this INode<T?>? node)
+    public static IEnumerable<INode<T?>> Preorder<T>(this INode<T?>? node)
     {
         if (node is null) yield break;
         yield return node;
-        for (int i = 0; i < node.Nodes.Length; i++)
+        foreach(INode<T?>? val in node?.Nodes.SelectMany(child => Preorder(child)) ?? [])
         {
-            foreach (INode<T?>? val in Preorder(node.Nodes[i])) yield return val;
+            yield return val;
         }
     }
 
@@ -91,16 +103,9 @@ public static partial class Tree
     {
         if (node is null) yield break;
         int mid = node.Nodes.Length / 2;
-        for (int i = 0; i < mid; i++)
-        {
-            foreach (INode<T?>? val in Preorder(node.Nodes[i])) yield return val;
-
-        }
+        foreach (INode<T?>? val in Enumerable.Range(0, mid).SelectMany(i => InOrder(node.Nodes[i]))) yield return val;
         yield return node;
-        for (int i = mid; i < node.Nodes.Length; i++)
-        {
-            foreach (INode<T?>? val in Preorder(node.Nodes[i])) yield return val;
-        }
+        foreach (INode<T?>? val in Enumerable.Range(mid, node.Nodes.Length - mid).SelectMany(i => InOrder(node.Nodes[i]))) yield return val;
     }
 
     /// <summary>
@@ -112,9 +117,9 @@ public static partial class Tree
     public static IEnumerable<INode<T?>?> PostOrder<T>(this INode<T?>? node)
     {
         if (node is null) yield break;
-        for (int i = 0; i < node.Nodes.Length; i++)
+        foreach (INode<T?>? val in node?.Nodes.SelectMany(child => PostOrder(child)) ?? [])
         {
-            foreach (INode<T?>? val in PostOrder(node.Nodes[i])) yield return val;
+            yield return val;
         }
         yield return node;
     }
@@ -125,16 +130,21 @@ public static partial class Tree
     /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<INode<T?>?> DepthFirstSearch<T>(this INode<T?>? node)
+    public static IEnumerable<INode<T?>?> DepthFirstSearch<T>(this INode<T?>? node,
+        Func<INode<T?>?, int>? orderByFunc = null)
     {
         if (node is null) yield break;
-        Stack<INode<T?>> stack = new();
+        Stack<INode<T?>?> stack = new();
         stack.Push(node);
         while (stack.Count > 0)
         {
-            INode<T?> current = stack.Pop();
+            INode<T?>? current = stack.Pop();
+            if(current is null) continue;
             yield return current;
-            foreach (INode<T?> child in current.Nodes)
+            IEnumerable<INode<T?>?> orderedNodes = orderByFunc is null ?
+                current.Nodes.Reverse() :
+                current.Nodes.OrderBy(orderByFunc);
+            foreach (INode<T?>? child in orderedNodes)
             {
                 stack.Push(child);
             }
@@ -150,13 +160,14 @@ public static partial class Tree
     public static IEnumerable<INode<T?>?> BreadthFirstSearch<T>(this INode<T?>? node)
     {
         if (node is null) yield break;
-        Queue<INode<T?>> queue = new();
+        Queue<INode<T?>?> queue = new();
         queue.Enqueue(node);
         while (queue.Count > 0)
         {
-            INode<T?> current = queue.Dequeue();
+            INode<T?>? current = queue.Dequeue();
+            if (current is null) continue;
             yield return current;
-            foreach (INode<T?> child in current.Nodes)
+            foreach (INode<T?>? child in current.Nodes)
             {
                 queue.Enqueue(child);
             }
@@ -179,7 +190,7 @@ public static partial class Tree
         }
         else if (depth > 0)
         {
-            foreach (INode<T?>? val in (node?.Nodes ?? Enumerable.Empty<INode<T?>>()).SelectMany(child => DepthLimitedSearch(child, depth - 1)))
+            foreach (INode<T?>? val in (node?.Nodes ?? Enumerable.Empty<INode<T?>?>()).SelectMany(child => DepthLimitedSearch(child, depth - 1)))
             {
                 yield return val;
             }
@@ -187,14 +198,71 @@ public static partial class Tree
         else if (depth is null)
         {
             yield return node;
-            foreach (INode<T?>? val in (node?.Nodes ?? Enumerable.Empty<INode<T?>>()).SelectMany(child => DepthLimitedSearch(child, depth)))
+            foreach (INode<T?>? val in (node?.Nodes ?? Enumerable.Empty<INode<T?>?>()).SelectMany(child => DepthLimitedSearch(child, depth)))
             {
                 yield return val;
             }
         }
         else if (depth < 0)
         {
-            yield break;
+
+
+            // Do nothing
+            // Go Complex Plane
+            // Contact the Doctor Dhir Patel
+            // Or the Doctor Strange
+            // Or the Doctor Who
+            // Or the Doctor Doom
+            // Or the Doctor Octopus
+            // Or the Doctor Manhattan
+            // Or the Doctor Jekyll
+            // Or the Doctor Faustus
+            // Or the Doctor Frankenstein
+            // Or the Doctor Moreau
+            // Or the Doctor Dolittle
+            // Or the Doctor Zhivago
+
+            //using(var doctor = new Doctor())
+            //{
+            //    doctor.ContactDoctorDhirPatel();
+            //    doctor.ContactDoctorStrange();
+            //    doctor.ContactDoctorWho();
+            //    doctor.ContactDoctorDoom();
+            //    doctor.ContactDoctorOctopus();
+            //    doctor.ContactDoctorManhattan();
+            //    doctor.ContactDoctorJekyll();
+            //    doctor.ContactDoctorFaustus();
+            //    doctor.ContactDoctorFrankenstein();
+            //    doctor.ContactDoctorMoreau();
+            //    doctor.ContactDoctorDolittle();
+            //    doctor.ContactDoctorZhivago();
+            //}
+
+            //TODO : sent a message to the doctor
+            //smpt and pop3 
+            //send and receive
+            //email and password
+            //from and to
+            //subject and body
+            //attachment and attachment
+
+            //https://www.codeproject.com/Articles/10649/Sending-Emails-in-NET-3-5-using-SMTP-and-POP3
+            //twilio
+            //sendgrid
+            //smpt
+            //pop3server
+            //email
+            //Rebex
+
+            //send message to boss or your self
+            //yield break;
+
+            {
+
+                //new Node<T>(default(T), []);
+                //yield break;
+            }
+            yield return Node<T?>.DebugNode.Value;
         }
     }
 

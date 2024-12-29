@@ -18,6 +18,21 @@ Console.WriteLine("     5   15");
 Console.WriteLine("    / \\    \\");
 Console.WriteLine("   2   7    20");
 
+
+Console.WriteLine("Constructing a simple tree:");
+Console.WriteLine("       10");
+Console.WriteLine("      /  \\");
+Console.WriteLine("     5   15");
+Console.WriteLine("    / \\    \\");
+Console.WriteLine("   2   7    20");
+Console.WriteLine("/ is right child, \\ is left child");
+
+
+//chemical bonding has angle and is 3d!
+//double bond and triple bond are also 3d!
+
+
+//NOT THE ABOVE TREE
 INode<int> root = new Node<int>(10, [
     new Node<int>(5,[ new Node<int>(2, []),new Node<int>(7, [])]),
     new Node<int>(15,[new Node<int>(20, [])])]);
@@ -54,7 +69,7 @@ List<int?> evenValues = root.Traverse(Tree.Preorder)
 Console.WriteLine($"We are the even values in Preorder: {string.Join(", ", evenValues)}");
 
 // Using LINQ selector on a depth first search traversal to search a list of values
-List<int?> searchValues = root.Traverse(Tree.DepthFirstSearch)
+List<int?> searchValues = root.Traverse(x=>Tree.DepthFirstSearch(x))
                      .Select(x => x?.Value ?? null)
                      .Where(x => x is 7 || x is 20)
                      .ToList();
@@ -73,19 +88,6 @@ Tree.BreadthFirstSearch(root).ToList().ForEach(x => Console.Write($"{x?.Value}, 
 Console.WriteLine();
 Tree.DepthLimitedSearch(root).ToList().ForEach(x => Console.Write($"{x?.Value}, "));
 
-//Console output:
-/***
-Hello Ray!
-Pre-order: 10, 5, 2, 7, 15, 20
-In-order: 5, 2, 7, 10, 15, 20
-Post-order: 2, 7, 5, 20, 15, 10
-Depth First Search: 10, 15, 20, 5, 7, 2
-Breadth First Search: 10, 5, 15, 2, 7, 20
-Depth Limited Search: 10, 5, 2, 7, 15, 20
-Iterative Deepening Depth First Search: 10, 5, 15, 2, 7, 20
-We are the Even values in Preorder: 10, 2, 20
-We are the search values in Depth First Search: 20, 7
-***/
 
 y<string, int>? aCase = y<string, int>.NewA("Hello");
 y<string, int>? bCase = y<string, int>.NewB(42);
@@ -113,3 +115,37 @@ static IEnumerable<y<T1?,T2?>> Ys<T1, T2>(IEnumerable<y<T1, T2>> ys)
     yield return y<T1?, T2?>.NewA(default(T1));
     yield return y<T1?, T2?>.NewB(default(T2));
 }
+
+//Console output:
+/***
+ * Hello Ray!
+Constructing a simple tree:
+       10
+      /  \
+     5   15
+    / \    \
+   2   7    20
+Constructing a simple tree:
+       10
+      /  \
+     5   15
+    / \    \
+   2   7    20
+/ is right child, \ is left child
+Pre-order: 10, 5, 2, 7, 15, 20
+In-order: 2, 5, 7, 10, 15, 20
+Post-order: 2, 7, 5, 20, 15, 10
+Depth First Search: 10, 5, 2, 7, 15, 20
+Breadth First Search: 10, 5, 15, 2, 7, 20
+Depth Limited Search(No Depth Limit): 10, 5, 2, 7, 15, 20
+Iterative Deepening Depth First Search: 10, 5, 15, 2, 7, 20
+We are the even values in Preorder: 10, 2, 20
+We are the search values in Depth First Search: 7, 20
+10, 5, 2, 7, 15, 20,
+2, 5, 7, 10, 15, 20,
+2, 7, 5, 20, 15, 10,
+10, 5, 2, 7, 15, 20,
+10, 5, 15, 2, 7, 20,
+10, 5, 2, 7, 15, 20, A: Hello
+A: Hello
+***/
