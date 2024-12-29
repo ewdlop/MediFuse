@@ -1,4 +1,6 @@
-﻿namespace MediFuseConsoleApp1;
+﻿using System.Collections;
+
+namespace MediFuseConsoleApp1;
 
 public static partial class Tree
 {
@@ -36,24 +38,31 @@ public static partial class Tree
         bool IsEndOfWord { get; }
     }
 
-    public class Node<T>(T? Value, Node<T?>[] Nodes) : INode<T?>
+    public class Node<T>(T? Value, Node<T?>[] Nodes) : INode<T?>, IEnumerable<INode<T?>?>
     {
-        public INode<T?>[] Nodes { get; set; } = Nodes;
+        public virtual INode<T?>[] Nodes { get; set; } = Nodes;
 
-        public IReadOnlyNode<T?> AsReadOnlyNode => this;
+        public virtual IReadOnlyNode<T?> AsReadOnlyNode => this;
 
-        public T? Value { get; set; } = Value;
+        public virtual T? Value { get; set; } = Value;
 
-        public IReadOnlyList<INode<T?>> AsReadOnlyList => Nodes;
+        public virtual IReadOnlyList<INode<T?>> AsReadOnlyList => Nodes;
 
-        public IReadOnlyNodeNeighborHood<T?> AsReadOnlyNeighbor => this;
+        public virtual IReadOnlyNodeNeighborHood<T?> AsReadOnlyNeighbor => this;
 
-        public IReadOnlyList<IReadOnlyNode<T?>> AsReadOnlyNodeList => Nodes;
+        public virtual IReadOnlyList<IReadOnlyNode<T?>> AsReadOnlyNodeList => Nodes;
+
+        public virtual IEnumerator<INode<T?>?> GetEnumerator()
+        {
+            return this.Preorder().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     public class TrieNode<T>(T? Value, Node<T?>[] Nodes, bool IsEndOfWord) : Node<T?>(Value, Nodes)
     {
-        public bool IsEndOfWord { get; set; } = IsEndOfWord;
+        public virtual bool IsEndOfWord { get; set; } = IsEndOfWord;
     }
 
     /// <summary>
@@ -62,13 +71,13 @@ public static partial class Tree
     /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<T?> Preorder<T>(this INode<T?>? node)
+    public static IEnumerable<INode<T?>?> Preorder<T>(this INode<T?>? node)
     {
         if (node is null) yield break;
-        yield return node.Value;
+        yield return node;
         for (int i = 0; i < node.Nodes.Length; i++)
         {
-            foreach (T? val in Preorder<T>(node.Nodes[i])) yield return val;
+            foreach (INode<T?>? val in Preorder(node.Nodes[i])) yield return val;
         }
     }
 
@@ -78,19 +87,19 @@ public static partial class Tree
     /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<T?> InOrder<T>(this INode<T?>? node)
+    public static IEnumerable<INode<T?>?> InOrder<T>(this INode<T?>? node)
     {
         if (node is null) yield break;
         int mid = node.Nodes.Length / 2;
         for (int i = 0; i < mid; i++)
         {
-            foreach (T? val in Preorder(node.Nodes[i])) yield return val;
+            foreach (INode<T?>? val in Preorder(node.Nodes[i])) yield return val;
 
         }
-        yield return node.Value;
+        yield return node;
         for (int i = mid; i < node.Nodes.Length; i++)
         {
-            foreach (T? val in Preorder(node.Nodes[i])) yield return val;
+            foreach (INode<T?>? val in Preorder(node.Nodes[i])) yield return val;
         }
     }
 
@@ -100,14 +109,14 @@ public static partial class Tree
     /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<T?> PostOrder<T>(this INode<T?>? node)
+    public static IEnumerable<INode<T?>?> PostOrder<T>(this INode<T?>? node)
     {
         if (node is null) yield break;
         for (int i = 0; i < node.Nodes.Length; i++)
         {
-            foreach (T? val in PostOrder(node.Nodes[i])) yield return val;
+            foreach (INode<T?>? val in PostOrder(node.Nodes[i])) yield return val;
         }
-        yield return node.Value;
+        yield return node;
     }
 
     /// <summary>
@@ -116,7 +125,7 @@ public static partial class Tree
     /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<T?> DepthFirstSearch<T>(this INode<T?>? node)
+    public static IEnumerable<INode<T?>?> DepthFirstSearch<T>(this INode<T?>? node)
     {
         if (node is null) yield break;
         Stack<INode<T?>> stack = new();
@@ -124,7 +133,7 @@ public static partial class Tree
         while (stack.Count > 0)
         {
             INode<T?> current = stack.Pop();
-            yield return current.Value;
+            yield return current;
             foreach (INode<T?> child in current.Nodes)
             {
                 stack.Push(child);
@@ -138,7 +147,7 @@ public static partial class Tree
     /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<T?> BreadthFirstSearch<T>(this INode<T?>? node)
+    public static IEnumerable<INode<T?>?> BreadthFirstSearch<T>(this INode<T?>? node)
     {
         if (node is null) yield break;
         Queue<INode<T?>> queue = new();
@@ -146,7 +155,7 @@ public static partial class Tree
         while (queue.Count > 0)
         {
             INode<T?> current = queue.Dequeue();
-            yield return current.Value;
+            yield return current;
             foreach (INode<T?> child in current.Nodes)
             {
                 queue.Enqueue(child);
@@ -161,32 +170,26 @@ public static partial class Tree
     /// <param name="node"></param>
     /// <param name="depth"></param>
     /// <returns></returns>
-    public static IEnumerable<T?> DepthLimitedSearch<T>(INode<T?>? node, int? depth = null)
+    public static IEnumerable<INode<T?>?> DepthLimitedSearch<T>(INode<T?>? node, int? depth = null)
     {
         if (node is null) yield break;
         if (depth == 0)
         {
-            yield return node.Value;
+            yield return node;
         }
         else if (depth > 0)
         {
-            foreach (INode<T?> child in node?.Nodes ?? Enumerable.Empty<INode<T?>>())
+            foreach (INode<T?>? val in (node?.Nodes ?? Enumerable.Empty<INode<T?>>()).SelectMany(child => DepthLimitedSearch(child, depth - 1)))
             {
-                foreach (T? val in DepthLimitedSearch(child, depth - 1))
-                {
-                    yield return val;
-                }
+                yield return val;
             }
         }
         else if (depth is null)
         {
-            yield return node.Value;
-            foreach (INode<T?> child in node?.Nodes ?? Enumerable.Empty<INode<T?>>())
+            yield return node;
+            foreach (INode<T?>? val in (node?.Nodes ?? Enumerable.Empty<INode<T?>>()).SelectMany(child => DepthLimitedSearch(child, depth)))
             {
-                foreach (T? val in DepthLimitedSearch(child, depth))
-                {
-                    yield return val;
-                }
+                yield return val;
             }
         }
         else if (depth < 0)
@@ -201,14 +204,14 @@ public static partial class Tree
     /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<T?> IterativeDeepeningDepthFirstSearch<T>(this INode<T?>? node)
+    public static IEnumerable<INode<T?>?> IterativeDeepeningDepthFirstSearch<T>(this INode<T?>? node)
     {
         if (node is null) yield break;
         int depth = 0;
         while (true)
         {
             bool hasNeighbors = false; // Flag to check if there are neighbors at the current depth level or not
-            foreach (T? val in DepthLimitedSearch(node, depth))
+            foreach (INode<T?>? val in DepthLimitedSearch(node, depth))
             {
                 hasNeighbors = true;
                 yield return val;
@@ -225,13 +228,12 @@ public static partial class Tree
     /// Generic traversal function
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <typeparam name="TResult"></typeparam>
     /// <param name="node"></param>
     /// <param name="traversalFunc"></param>
     /// <returns></returns>
-    public static IEnumerable<TResult?> Traverse<T, TResult>(
+    public static IEnumerable<INode<T?>?> Traverse<T>(
         this INode<T?>? node,
-        Func<INode<T?>?, IEnumerable<TResult?>> traversalFunc)
+        Func<INode<T?>?, IEnumerable<INode<T?>?>> traversalFunc)
     {
         return traversalFunc(node);
     }
@@ -239,11 +241,11 @@ public static partial class Tree
     /// <summary>
     /// Pre-order traversal
     /// </summary>
-    /// <typeparam name="TResult"></typeparam>
+    /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<TResult?> PreOrderTraverse<TResult>(
-        this INode<TResult?>? node)
+    public static IEnumerable<INode<T?>?> PreOrderTraverse<T>(
+        this INode<T?>? node)
     {
         return Preorder(node);
     }
@@ -251,11 +253,11 @@ public static partial class Tree
     /// <summary>
     /// In-order traversal
     /// </summary>
-    /// <typeparam name="TResult"></typeparam>
+    /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<TResult?> InOrderTraverse<TResult>(
-        this INode<TResult?>? node)
+    public static IEnumerable<INode<T?>?> InOrderTraverse<T>(
+        this INode<T?>? node)
     {
         return InOrder(node);
     }
@@ -264,11 +266,11 @@ public static partial class Tree
     /// <summary>
     /// Post-order traversal
     /// </summary>
-    /// <typeparam name="TResult"></typeparam>
+    /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<TResult?> PostOrderTraverse<TResult>(
-        this INode<TResult?>? node)
+    public static IEnumerable<INode<T?>?> PostOrderTraverse<T>(
+        this INode<T?>? node)
     {
         return PostOrder(node);
     }
@@ -276,11 +278,11 @@ public static partial class Tree
     /// <summary>
     /// Depth First Search traversal
     /// </summary>
-    /// <typeparam name="TResult"></typeparam>
+    /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<TResult?> DepthFirstSearchTraverse<TResult>(
-        this INode<TResult?>? node)
+    public static IEnumerable<INode<T?>?> DepthFirstSearchTraverse<T>(
+        this INode<T?>? node)
     {
         return DepthFirstSearch(node);
     }
@@ -289,11 +291,11 @@ public static partial class Tree
     /// <summary>
     /// Breadth First Search traversal
     /// </summary>
-    /// <typeparam name="TResult"></typeparam>
+    /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<TResult?> BreathFirstSearchTraverse<TResult>(
-        this INode<TResult?>? node)
+    public static IEnumerable<INode<T?>?> BreathFirstSearchTraverse<T>(
+        this INode<T?>? node)
     {
         return BreadthFirstSearch(node);
     }
@@ -302,12 +304,12 @@ public static partial class Tree
     /// <summary>
     /// Depth Limited Search traversal
     /// </summary>
-    /// <typeparam name="TResult"></typeparam>
+    /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <param name="depth"></param>
     /// <returns></returns>
-    public static IEnumerable<TResult?> DepthLimitedSearchTraverse<TResult>(
-        this INode<TResult?>? node, int? depth = null)
+    public static IEnumerable<INode<T?>?> DepthLimitedSearchTraverse<T>(
+        this INode<T?>? node, int? depth = null)
     {
         return DepthLimitedSearch(node, depth);
     }
@@ -316,10 +318,10 @@ public static partial class Tree
     /// <summary>
     /// Iterative Deepening Depth First Search traversal
     /// </summary>
-    /// <typeparam name="TResult"></typeparam>
+    /// <typeparam name="T"></typeparam>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static IEnumerable<TResult?> IterativeDeepeningDepthFirstSearchTraverse<TResult>(this INode<TResult?>? node)
+    public static IEnumerable<INode<T?>?> IterativeDeepeningDepthFirstSearchTraverse<T>(this INode<T?>? node)
     {
         return IterativeDeepeningDepthFirstSearch(node);
     }

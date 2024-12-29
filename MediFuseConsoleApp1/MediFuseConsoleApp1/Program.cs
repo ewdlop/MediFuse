@@ -1,5 +1,6 @@
 ﻿using MediFuseConsoleApp1;
 using static MediFuseConsoleApp1.Tree;
+using static MediFuseClassLibrary.MyUnion;
 
 Console.WriteLine("Hello Ray!");
 //Console.WriteLine("In-order: " + string.Join(", ", ino));
@@ -22,53 +23,55 @@ INode<int> root = new Node<int>(10, [
     new Node<int>(15,[new Node<int>(20, [])])]);
 
 // Pre-order traversal
-List<int> pre = root.Preorder().ToList();
+List<int?> pre = root.Preorder().Select(n => n?.Value ?? null).ToList();
 Console.WriteLine($"Pre-order: {string.Join(", ", pre)}");
 // In-order traversal
-List<int> ino = root.InOrder().ToList();
+List<int?> ino = root.InOrder().Select(n => n?.Value ?? null).ToList();
 Console.WriteLine($"In-order: {string.Join(", ", ino)}");
 // Post-order traversal
-List<int> post = root.PostOrder().ToList();
+List<int?> post = root.PostOrder().Select(n => n?.Value ?? null).ToList();
 Console.WriteLine($"Post-order: {string.Join(", ", post)}");
 // Depth First traversal
-List<int> dfs = root.DepthFirstSearch().ToList();
+List<int?> dfs = root.DepthFirstSearch().Select(n => n?.Value ?? null).ToList();
 Console.WriteLine($"Depth First Search: {string.Join(", ", dfs)}");
 // Breadth First traversal
-List<int> bfs = root.BreadthFirstSearch().ToList();
+List<int?> bfs = root.BreadthFirstSearch().Select(n => n?.Value ?? null).ToList();
 Console.WriteLine($"Breadth First Search: {string.Join(", ", bfs)}");
 // Depth Limited Search
-List<int> dls = root.DepthLimitedSearchTraverse().ToList();
+List<int?> dls = root.DepthLimitedSearchTraverse().Select(n => n?.Value ?? null).ToList();
 Console.WriteLine($"Depth Limited Search(No Depth Limit): {string.Join(", ", dls)}");
 // Iterative Deepening Depth First Search
-List<int> iddfs = root.IterativeDeepeningDepthFirstSearch().ToList();
+List<int?> iddfs = root.IterativeDeepeningDepthFirstSearch().Select(n => n?.Value ?? null).ToList();
 Console.WriteLine($"Iterative Deepening Depth First Search: {string.Join(", ", iddfs)}");
 
 
 // Using LINQ selector on a preorder traversal to select only even values
-List<int> evenValues = root.Traverse(Tree.Preorder)
-                     .Where(x => x % 2 == 0)
+List<int?> evenValues = root.Traverse(Tree.Preorder)
+                     .Select(x => x?.Value ?? null)
+                     .Where(x => x % 2 is 0)
                      .ToList();
 
 Console.WriteLine($"We are the even values in Preorder: {string.Join(", ", evenValues)}");
 
 // Using LINQ selector on a depth first search traversal to search a list of values
-List<int> searchValues = root.Traverse(Tree.DepthFirstSearch)
-                     .Where(x => x == 7 || x == 20)
+List<int?> searchValues = root.Traverse(Tree.DepthFirstSearch)
+                     .Select(x => x?.Value ?? null)
+                     .Where(x => x is 7 || x is 20)
                      .ToList();
 Console.WriteLine($"We are the search values in Depth First Search: {string.Join(", ", searchValues)}");
 
 
-Tree.Preorder(root).ToList().ForEach(x => Console.Write($"{x}, "));
+Tree.Preorder(root).ToList().ForEach(x => Console.Write($"{x?.Value}, "));
 Console.WriteLine();
-Tree.InOrder(root).ToList().ForEach(x => Console.Write($"{x}, "));
+Tree.InOrder(root).ToList().ForEach(x => Console.Write($"{x?.Value}, "));
 Console.WriteLine();
-Tree.PostOrder(root).ToList().ForEach(x => Console.Write($"{x}, "));
+Tree.PostOrder(root).ToList().ForEach(x => Console.Write($"{x?.Value}, "));
 Console.WriteLine();
-Tree.DepthFirstSearch(root).ToList().ForEach(x => Console.Write($"{x}, "));
+Tree.DepthFirstSearch(root).ToList().ForEach(x => Console.Write($"{x?.Value}, "));
 Console.WriteLine();
-Tree.BreadthFirstSearch(root).ToList().ForEach(x => Console.Write($"{x}, "));
+Tree.BreadthFirstSearch(root).ToList().ForEach(x => Console.Write($"{x?.Value}, "));
 Console.WriteLine();
-Tree.DepthLimitedSearch(root).ToList().ForEach(x => Console.Write($"{x}, "));
+Tree.DepthLimitedSearch(root).ToList().ForEach(x => Console.Write($"{x?.Value}, "));
 
 //Console output:
 /***
@@ -83,3 +86,30 @@ Iterative Deepening Depth First Search: 10, 5, 15, 2, 7, 20
 We are the Even values in Preorder: 10, 2, 20
 We are the search values in Depth First Search: 20, 7
 ***/
+
+y<string, int>? aCase = y<string, int>.NewA("Hello");
+y<string, int>? bCase = y<string, int>.NewB(42);
+
+switch(aCase)
+{
+    case y<string, int>.A A:
+        Console.WriteLine($"A: {A.Item}");
+        break;
+    case y<string, int>.B B:
+        Console.WriteLine($"B: {B.Item}");
+        break;
+}
+if (aCase is y<string, int>.A a)
+{
+    Console.WriteLine($"A: {a.Item}");
+}
+else if (bCase is y<string, int>.B b)
+{
+    Console.WriteLine($"B: {b.Item}");
+}
+
+static IEnumerable<y<T1?,T2?>> Ys<T1, T2>(IEnumerable<y<T1, T2>> ys)
+{
+    yield return y<T1?, T2?>.NewA(default(T1));
+    yield return y<T1?, T2?>.NewB(default(T2));
+}
