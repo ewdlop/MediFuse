@@ -103,3 +103,7 @@ Certainly! Here's an explanation of the remaining items in your list:
 - **Legacy ICD-9-CM Codes:** The International Classification of Diseases, 9th Revision, Clinical Modification (ICD-9-CM) was a standardized coding system used in the United States to classify diseases and a wide variety of signs, symptoms, abnormal findings, complaints, social circumstances, and external causes of injury or disease. It was used for medical billing and statistical purposes. ICD-9-CM was replaced by ICD-10-CM on October 1, 2015, but legacy codes may still be referenced for historical data. 
 
 If you have any specific questions or need further details on any of these topics, feel free to ask! 
+
+## Direct Product[?]?[ By Product?]?
+- [https://github.com/ewdlop/MedFuse]
+- [https://github.com/ewdlop/KOL]
