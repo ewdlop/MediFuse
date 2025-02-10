@@ -104,6 +104,6 @@ Certainly! Here's an explanation of the remaining items in your list:
 
 If you have any specific questions or need further details on any of these topics, feel free to ask! 
 
-## Direct Product[?]?[ By Product?]?
+## Direct Product[?]?[ By[ -]?Product?]?
 - [https://github.com/ewdlop/MedFuse]
 - [https://github.com/ewdlop/KOL]
